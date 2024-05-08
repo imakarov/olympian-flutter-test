@@ -3,6 +3,7 @@ import '../viewmodels/game_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 import '../styles.dart';
+import 'hand_tap_overlay.dart';
 import 'image_dialog.dart';
 import 'shake.dart';
 import '../utils/ext.dart';
@@ -41,9 +42,9 @@ class _WordItemState extends State<WordItem> {
 
     _wordFocusNode.addListener(() {
       context.read<GameViewModel>().wordFocus(
-        word: widget.word,
-        focus: _wordFocusNode.hasFocus,
-      );
+            word: widget.word,
+            focus: _wordFocusNode.hasFocus,
+          );
 
       if (!_wordFocusNode.hasFocus) {
         context.read<GameViewModel>().clearActiveWord();
@@ -66,15 +67,16 @@ class _WordItemState extends State<WordItem> {
           onShow: () {
             _wordFocusNode.unfocus();
             _textController.clear();
-          }
-      );
+          });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final showInput = [WordState.idle, WordState.incorrect, WordState.input].contains(widget.word.state);
-    final showImageInput = widget.word.image != '' || widget.word.description != '';
+    final showInput = [WordState.idle, WordState.incorrect, WordState.input]
+        .contains(widget.word.state);
+    final showImageInput =
+        widget.word.image != '' || widget.word.description != '';
 
     if (!_wordFocusNode.hasFocus && _textController.value.text != '') {
       _textController.clear();
@@ -121,25 +123,15 @@ class _WordItemState extends State<WordItem> {
                   top: 10,
                   left: 22,
                   right: 22,
-                  child: GestureDetector(
-                    onTap: () {
-                      if (context.read<GameViewModel>().showWrongAnswerDialog) {
-                        wrongAnswer();
-                        return;
-                      }
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      showDialog(
-                        context: context,
-                        barrierColor: Colors.black45,
-                        builder: (ctx) => ImageDialog(
-                          word: widget.word,
-                          vm: context.read<GameViewModel>(),
-                        ),
-                      );
-                    },
-                    child: const SizedBox(
-                      height: 48,
-                      child: Text(''),
+                  child: HandTapOverlay(
+                    showHandTap: widget.word.showHandTap,
+                    onTap: enterWord,
+                    child: GestureDetector(
+                      onTap: enterWord,
+                      child: const SizedBox(
+                        height: 48,
+                        child: Text(''),
+                      ),
                     ),
                   ),
                 )
@@ -183,6 +175,22 @@ class _WordItemState extends State<WordItem> {
                 )
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> enterWord() async {
+    if (context.read<GameViewModel>().showWrongAnswerDialog) {
+      wrongAnswer();
+      return;
+    }
+    FocusScope.of(context).requestFocus(FocusNode());
+    await showDialog(
+      context: context,
+      barrierColor: Colors.black45,
+      builder: (ctx) => ImageDialog(
+        word: widget.word,
+        vm: context.read<GameViewModel>(),
       ),
     );
   }
