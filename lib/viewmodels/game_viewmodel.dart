@@ -105,7 +105,22 @@ class GameViewModel with ChangeNotifier {
   play() {
     tapPlay();
     final index = getLastActiveIndex();
-    setActiveLevel(index == -1 ? _levels[0] : _levels[index]);
+
+    LevelModel tempLevel;
+    if (index == 0) {
+      tempLevel = _levels[0];
+      final correctIndex = tempLevel.data.indexWhere(
+          (element) => element.word.toLowerCase().trim() == 'камень');
+      if (correctIndex != -1) {
+        tempLevel.data[correctIndex].showHandTap = true;
+      }
+    } else {
+      tempLevel = _levels[index];
+    }
+    tempLevel.data.forEach((element) {
+      print(element.word);
+    });
+    setActiveLevel(tempLevel);
   }
 
   getLastActiveIndex() {
@@ -125,6 +140,7 @@ class GameViewModel with ChangeNotifier {
           word.showStartLeaf = true;
           word.showEndLeaf = true;
         }
+
         if (isEven) {
           word.showOddLeaf = true;
         } else {
@@ -209,7 +225,10 @@ class GameViewModel with ChangeNotifier {
         }
 
         // Монеты за прохождение всех слов в столбце
-        final isRowComplete = depthWords.where((element) => element.state == WordState.correct).length == depthWords.length;
+        final isRowComplete = depthWords
+                .where((element) => element.state == WordState.correct)
+                .length ==
+            depthWords.length;
 
         if (isRowComplete) {
           coins += _conf.appConfig.entireColumnsCoins;
@@ -269,12 +288,13 @@ class GameViewModel with ChangeNotifier {
     return isCorrect;
   }
 
-  showBanner({ required BuildContext context }) {
+  showBanner({required BuildContext context}) {
     // Показ баннера
     if (getLevelIndex() > 1) {
       Navigator.of(context).push(
         PageRouteBuilder(
-          pageBuilder: (context, animation1, animation2) => const AdvTimeScreen(),
+          pageBuilder: (context, animation1, animation2) =>
+              const AdvTimeScreen(),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
         ),
@@ -325,7 +345,8 @@ class GameViewModel with ChangeNotifier {
     }
     word.state = focus ? WordState.input : WordState.idle;
     try {
-      focusedWord = activeLevel.data.firstWhere((w) => w.state == WordState.input);
+      focusedWord =
+          activeLevel.data.firstWhere((w) => w.state == WordState.input);
     } catch (e) {
       focusedWord = null;
     }
@@ -644,7 +665,8 @@ class GameViewModel with ChangeNotifier {
   }
 
   _cacheImages() {
-    for (final lvl in _levels.where((element) => element.state == LevelState.available)) {
+    for (final lvl
+        in _levels.where((element) => element.state == LevelState.available)) {
       final wordsWithImage =
           lvl.data.where((element) => element.image.isNotEmpty);
       for (final word in wordsWithImage) {

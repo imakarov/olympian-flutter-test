@@ -20,6 +20,7 @@ class WordModel {
   bool showEndLeaf;
   bool showEvenLeaf;
   bool showOddLeaf;
+  bool showHandTap;
 
   WordModel({
     required this.depth,
@@ -32,6 +33,7 @@ class WordModel {
     this.showEndLeaf = false,
     this.showOddLeaf = false,
     this.showEvenLeaf = false,
+    this.showHandTap = false,
   });
 
   factory WordModel.fromJson(Map<dynamic, dynamic> json) {
@@ -41,7 +43,7 @@ class WordModel {
         synonyms.add(formatWord(value));
       });
 
-      if(!kReleaseMode) {
+      if (!kReleaseMode) {
         synonyms.add(formatWord('1'));
       }
     }
@@ -49,7 +51,9 @@ class WordModel {
     return WordModel(
       depth: json['depth'],
       word: json['word'],
-      state: json['state'] != null ? wordStateFromString(json['state']) : WordState.idle,
+      state: json['state'] != null
+          ? wordStateFromString(json['state'])
+          : WordState.idle,
       synonyms: synonyms,
       image: json['image'] ?? '',
       description: json['description'] ?? '',
@@ -69,7 +73,7 @@ class WordModel {
 }
 
 wordStateToString(WordState state) {
-  switch(state) {
+  switch (state) {
     case WordState.idle:
       return 'idle';
     case WordState.correct:
@@ -82,7 +86,7 @@ wordStateToString(WordState state) {
 }
 
 wordStateFromString(String state) {
-  switch(state) {
+  switch (state) {
     case 'idle':
       return WordState.idle;
     case 'correct':
